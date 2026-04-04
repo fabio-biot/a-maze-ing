@@ -1,8 +1,18 @@
 import sys
 import random
-from git.git_LBOH.config_loader import MazeGenerator, ConfigError
-from git.git_LBOH.maze_logic import Maze
-from git.git_LBOH.render_maze import Renderer
+from config_loader import MazeGenerator, ConfigError
+from maze_logic import Maze
+from render_maze import Renderer
+
+
+def convert_to_hex(neighbors: dict) -> str:
+    n = '0' if not neighbors['N'] else '1'
+    e = '0' if not neighbors['E'] else '1'
+    s = '0' if not neighbors['S'] else '1'
+    w = '0' if not neighbors['W'] else '1'
+
+    binary = w + s + e + n
+    return hex(int(binary, 2))[2:].upper()
 
 
 def main():
@@ -51,15 +61,32 @@ def main():
     if not validated_conf.get("PERFECT", True):
         mazee.not_perfect()
 
-    mazee.find_solution()  # On calcule la solution (BFS)
+    path = mazee.find_solution()  # On calcule la solution (BFS)
     mazee.switch_path(False)  # Cache le chemin par défaut
 
     render.render_maze(mazee.maze)
 
     # État du chemin : 1 = Caché, 0 = Visible (selon ta logique de switch)
     path_hidden = True
+    # generation du file.txt
+    # output_generator(path) vkianhflbnaojdnvdsavnkjnzlskvnljnvkzfnlnb  fojfnfjzdes des des dedsdedsdesd
+    # a_test = {}
+    # for y, row in enumerate(mazee.maze):
+    #     for x, cell in enumerate(row):
+    #         neighbors = cell.get_neighbors(mazee.maze, y, x)
+    #         a_test[(y, x)] = convert_to_hex(neighbors)
+    #         # print(neighbors)
+    # print(a_test.values())
+    for y, row in enumerate(mazee.maze):
+        line = ""
+        for x, cell in enumerate(row):
+            neighbors = cell.get_neighbors(mazee.maze, y, x)
+            line += convert_to_hex(neighbors)
+        print(line)
+
 
     # 5. Boucle d'interaction (Menu)
+
     while True:
         print("\n=== A-MAZE-ING MENU ===")
         print("1. Regenerate new maze")
@@ -79,7 +106,7 @@ def main():
                 # On recrée l'objet
                 mazee = Maze(validated_conf)
 
-                mazee.inject_42()
+                # mazee.inject_42()
                 mazee.create_paths()
 
                 # On respecte la règle PERFECT du sujet [cite: 122, 141]
@@ -88,7 +115,7 @@ def main():
 
 
                 # CRUCIAL : On calcule la solution tout de suite pour l'avoir en mémoire [cite: 157, 224]
-                mazee.find_solution() 
+                mazee.find_solution()
 
                 # On s'assure que le chemin est caché au départ
                 mazee.switch_path(False)

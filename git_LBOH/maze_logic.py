@@ -1,4 +1,4 @@
-from git.git_LBOH.render_maze import BG_RED, BG_BLUE, BG_GREEN, RESET, BG_CYAN, PATTERN_42
+from render_maze import BG_RED, BG_BLUE, BG_GREEN, RESET, BG_CYAN, PATTERN_42
 import random
 
 
@@ -59,6 +59,7 @@ class Maze():
     def _get_unvisited_neighbors(self, current_y, current_x) -> list[tuple]:
         unvisitied_neighbors = []
         directions = [(0, 2), (0, -2), (2, 0), (-2, 0)]
+
         for dy, dx in directions:
             next_y, next_x = current_y + dy, current_x + dx
             if 0 <= next_x < self.width * 2 + 1 \
@@ -89,33 +90,25 @@ class Maze():
                 stack.pop()
 
     def inject_42(self):
-        maze_height = len(self.maze)
-        maze_width = len(self.maze[0])
-
-        pattern_height = len(PATTERN_42)
-        pattern_width = len(PATTERN_42[0])
-
-        offset_y = (maze_height - pattern_height) // 2
-        offset_x = (maze_width - pattern_width) // 2
         if self.height < 5 or self.width < 5:
+            print("Maze too small to show 42")
             return
+        pattern = PATTERN_42
+        offset_y = (self.height - len(pattern)) // 2
+        offset_x = (self.width - len(pattern[0])) // 2
 
-        for y, line in enumerate(PATTERN_42):
-            for x, char in enumerate(line):
-                target_y = offset_y + y
-                target_x = offset_x + x
-
-                if target_y < len(self.maze) and target_x < len(self.maze[0]):
-                    if char == "X":
-                        self.maze[target_y][target_x].is_wall = True
-                        self.maze[target_y][target_x].is_42 = True
-                        self.maze[target_y][target_x].is_visited = True
-                    elif char == " ":
-                        self.maze[target_y][target_x].is_wall = True
-                        self.maze[target_y][target_x].is_visited = False
-                    elif char == ".":
-                        self.maze[target_y][target_x].is_wall = False
-                        self.maze[target_y][target_x].is_visited = False
+        for py, row in enumerate(pattern):
+            for px, char in enumerate(row):
+                y = (offset_y + py) * 2 + 1
+                x = (offset_x + px) * 2 + 1
+                cell = self.maze[y][x]
+                if char == "X":
+                    cell.is_wall = True
+                    cell.is_42 = True
+                    cell.is_visited = True
+                elif char == " ":
+                    cell.is_wall = False
+                    cell.is_visited = False
 
     def _get_walkable_neighbors(self, cell: tuple[int, int]) -> list[tuple]:
         directions = [(0, 1), (1, 0), (-1, 0), (0, -1)]
@@ -145,19 +138,16 @@ class Maze():
         moves = {entry: None}
         queue = []
         queue.append(entry)
-
+        # print(queue)
         while queue:
             current = queue[0]
             queue.remove(queue[0])
-
             if current == target:
                 return self._reconstruct_path(moves, target)
-
             for neighbor in self._get_walkable_neighbors(current):
                 if neighbor not in moves:
                     moves[neighbor] = current
                     queue.append(neighbor)
-
         return None
 
     def switch_path(self, show: bool) -> None:
@@ -191,6 +181,10 @@ class Cell():
         self.is_visited = False
         self.is_42 = False
         self.is_path = False
+        self.w_north = False
+        self.w_south = False
+        self.w_east = False
+        self.w_west = False
 
     def print_self(self):
         if self.is_path:
@@ -202,6 +196,19 @@ class Cell():
         else:
             print("  ", end="")
 
+    def get_neighbors(self, maze, y, x):
+        neighbors = {}
+        directions = {'N': (-1, 0), 'S': (1, 0), 'W': (0, -1), 'E': (0, 1)}
+        for dir, (dy, dx) in directions.items():
+            ny, nx = y + dy, x + dx
+            if 0 <= ny < len(maze) and 0 <= nx < len(maze[0]):
+                neighbors[dir] = maze[ny][nx].is_wall
+            elif 0 > ny or ny > len(maze) or 0 > nx or nx > len(maze[0]):
+                neighbors[dir] = True
+            else:
+                neighbors[dir] = None
+        return neighbors
+
 
 class Entry(Cell):
     def print_self(self):
@@ -211,3 +218,6 @@ class Entry(Cell):
 class Exit(Cell):
     def print_self(self):
         print(f"{BG_GREEN}  {RESET}", end="")
+
+
+
