@@ -199,14 +199,15 @@ class Cell():
     def get_neighbors(self, maze, y, x):
         neighbors = {}
         directions = {'N': (-1, 0), 'S': (1, 0), 'W': (0, -1), 'E': (0, 1)}
+
         for dir, (dy, dx) in directions.items():
             ny, nx = y + dy, x + dx
+
             if 0 <= ny < len(maze) and 0 <= nx < len(maze[0]):
                 neighbors[dir] = maze[ny][nx].is_wall
-            elif 0 > ny or ny > len(maze) or 0 > nx or nx > len(maze[0]):
-                neighbors[dir] = True
             else:
-                neighbors[dir] = None
+                neighbors[dir] = True  # bord = mur fermé
+
         return neighbors
 
 
@@ -220,4 +221,20 @@ class Exit(Cell):
         print(f"{BG_GREEN}  {RESET}", end="")
 
 
+def path_to_directions(path: list[tuple]) -> str:
+    moves = []
 
+    for i in range(1, len(path)):
+        y0, x0 = path[i-1]
+        y1, x1 = path[i]
+
+        if y1 < y0:
+            moves.append("N")
+        elif y1 > y0:
+            moves.append("S")
+        elif x1 < x0:
+            moves.append("W")
+        elif x1 > x0:
+            moves.append("E")
+
+    return "".join(moves)

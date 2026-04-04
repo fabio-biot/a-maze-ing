@@ -1,7 +1,7 @@
 import sys
 import random
 from config_loader import MazeGenerator, ConfigError
-from maze_logic import Maze
+from maze_logic import Maze, path_to_directions
 from render_maze import Renderer
 
 
@@ -62,6 +62,7 @@ def main():
         mazee.not_perfect()
 
     path = mazee.find_solution()  # On calcule la solution (BFS)
+    path = path_to_directions(path)
     mazee.switch_path(False)  # Cache le chemin par défaut
 
     render.render_maze(mazee.maze)
@@ -70,13 +71,15 @@ def main():
     path_hidden = True
     # generation du file.txt
     # output_generator(path) vkianhflbnaojdnvdsavnkjnzlskvnljnvkzfnlnb  fojfnfjzdes des des dedsdedsdesd
+
     # a_test = {}
     # for y, row in enumerate(mazee.maze):
     #     for x, cell in enumerate(row):
     #         neighbors = cell.get_neighbors(mazee.maze, y, x)
     #         a_test[(y, x)] = convert_to_hex(neighbors)
-    #         # print(neighbors)
+    #         print(neighbors)
     # print(a_test.values())
+
     with open(validated_conf["OUTPUT_FILE"], 'w') as f:
         for y, row in enumerate(mazee.maze):
             to_write = ""
@@ -85,7 +88,11 @@ def main():
                 to_write += convert_to_hex(neighbors)
             f.write(to_write)
             f.write('\n')
+        f.write('\n')
+        f.write(f"{mazee.entry[0]},{mazee.entry[1]}\n")
+        f.write(f"{mazee.exit[0]},{mazee.exit[1]}\n")
 
+        f.write(str(path))
 
     # 5. Boucle d'interaction (Menu)
 
@@ -125,6 +132,14 @@ def main():
 
                 # On affiche le nouveau labyrinthe vide de solution
                 render.render_maze(mazee.maze)
+                with open(validated_conf["OUTPUT_FILE"], 'w') as f:
+                    for y, row in enumerate(mazee.maze):
+                        to_write = ""
+                        for x, cell in enumerate(row):
+                            neighbors = cell.get_neighbors(mazee.maze, y, x)
+                            to_write += convert_to_hex(neighbors)
+                        f.write(to_write)
+                        f.write('\n')
 
             elif choice == "2":
                 # Si path_hidden est True, on passe à False (on montre)
