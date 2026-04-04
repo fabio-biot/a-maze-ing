@@ -80,6 +80,11 @@ class MazeGenerator():
                         raise ConfigError("PERFECT must be True or False")
                     else:
                         conf[key] = bool(conf_dict[key])
+                elif key == "OUTPUT_FILE":
+                    if not conf_dict["OUTPUT_FILE"].endswith(".txt"):
+                        raise ConfigError("Output file must be format '.txt'")
+                    else:
+                        conf[key] = str(conf_dict["OUTPUT_FILE"])
                 else:
                     conf[key] = expected_type(conf_dict[key])
 

@@ -77,12 +77,14 @@ def main():
     #         a_test[(y, x)] = convert_to_hex(neighbors)
     #         # print(neighbors)
     # print(a_test.values())
-    for y, row in enumerate(mazee.maze):
-        line = ""
-        for x, cell in enumerate(row):
-            neighbors = cell.get_neighbors(mazee.maze, y, x)
-            line += convert_to_hex(neighbors)
-        print(line)
+    with open(validated_conf["OUTPUT_FILE"], 'w') as f:
+        for y, row in enumerate(mazee.maze):
+            to_write = ""
+            for x, cell in enumerate(row):
+                neighbors = cell.get_neighbors(mazee.maze, y, x)
+                to_write += convert_to_hex(neighbors)
+            f.write(to_write)
+            f.write('\n')
 
 
     # 5. Boucle d'interaction (Menu)
