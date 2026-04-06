@@ -67,6 +67,7 @@ class MazeGenerator():
                             int(conf_dict["WIDTH"]) * 2:
                         raise ConfigError(f"{key} must be"
                                           " inside the maze")
+
                     expected_type(conf_dict[key])
                     conf[key] = [int(conf_dict[key].split(",")[0]),
                                  int(conf_dict[key].split(",")[1])]
@@ -89,8 +90,7 @@ class MazeGenerator():
                     conf[key] = expected_type(conf_dict[key])
 
             except ValueError:
-                raise ConfigError(f"Key: {key} must be of type:"
-                                  f"{expected_type.__name__}")
+                raise ConfigError(f"Key: {key} must be of type: int")
         if conf["ENTRY"] == conf["EXIT"]:
             raise ConfigError("Entry point and Exit point"
                               " cannot be the same")

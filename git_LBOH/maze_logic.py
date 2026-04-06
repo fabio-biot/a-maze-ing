@@ -1,4 +1,5 @@
 from render_maze import BG_RED, BG_BLUE, BG_GREEN, RESET, BG_CYAN, PATTERN_42
+from collections import deque
 import random
 
 
@@ -132,16 +133,18 @@ class Maze():
         return path[::-1]
 
     def find_solution(self):
+        for row in self.maze:
+            for cell in row:
+                cell.is_path = False
+
         entry = tuple(self.entry)
         target = tuple(self.exit)
 
         moves = {entry: None}
-        queue = []
-        queue.append(entry)
-        # print(queue)
+        queue = deque([entry])
+
         while queue:
-            current = queue[0]
-            queue.remove(queue[0])
+            current = queue.popleft()
             if current == target:
                 return self._reconstruct_path(moves, target)
             for neighbor in self._get_walkable_neighbors(current):
@@ -229,12 +232,12 @@ def path_to_directions(path: list[tuple]) -> str:
         y1, x1 = path[i]
 
         if y1 < y0:
-            moves.append("N")
-        elif y1 > y0:
             moves.append("S")
+        elif y1 > y0:
+            moves.append("N")
         elif x1 < x0:
-            moves.append("W")
-        elif x1 > x0:
             moves.append("E")
+        elif x1 > x0:
+            moves.append("W")
 
     return "".join(moves)

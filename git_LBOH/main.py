@@ -60,9 +60,13 @@ def main():
     # Si la config demande un labyrinthe NON-parfait (False)
     if not validated_conf.get("PERFECT", True):
         mazee.not_perfect()
+    raw_path = mazee.find_solution()
+    # print(f"Raw path (coordinates): {raw_path}")
+    path_directions = path_to_directions(raw_path)
+    # print(f"Dir path (coordinates): {path_directions}")
+    path_directions = path_directions[::-1]
+    # print(f"Dir path (coordinates): {path_directions}")
 
-    path = mazee.find_solution()  # On calcule la solution (BFS)
-    path = path_to_directions(path)
     mazee.switch_path(False)  # Cache le chemin par défaut
 
     render.render_maze(mazee.maze)
@@ -70,8 +74,6 @@ def main():
     # État du chemin : 1 = Caché, 0 = Visible (selon ta logique de switch)
     path_hidden = True
     # generation du file.txt
-    # output_generator(path) vkianhflbnaojdnvdsavnkjnzlskvnljnvkzfnlnb  fojfnfjzdes des des dedsdedsdesd
-
     # a_test = {}
     # for y, row in enumerate(mazee.maze):
     #     for x, cell in enumerate(row):
@@ -92,7 +94,7 @@ def main():
         f.write(f"{mazee.entry[0]},{mazee.entry[1]}\n")
         f.write(f"{mazee.exit[0]},{mazee.exit[1]}\n")
 
-        f.write(str(path))
+        f.write(str(path_directions))
 
     # 5. Boucle d'interaction (Menu)
 
@@ -121,16 +123,16 @@ def main():
                 # On respecte la règle PERFECT du sujet [cite: 122, 141]
                 if not validated_conf.get("PERFECT"):
                     mazee.not_perfect()
+                raw_path = mazee.find_solution()
 
+                if raw_path is None:
+                    print("No path found")
+                    return
 
-                # CRUCIAL : On calcule la solution tout de suite pour l'avoir en mémoire [cite: 157, 224]
-                mazee.find_solution()
-
-                # On s'assure que le chemin est caché au départ
+                path_directions = path_to_directions(raw_path)
+                path_directions = path_directions[::-1]
                 mazee.switch_path(False)
                 path_hidden = True
-
-                # On affiche le nouveau labyrinthe vide de solution
                 render.render_maze(mazee.maze)
                 with open(validated_conf["OUTPUT_FILE"], 'w') as f:
                     for y, row in enumerate(mazee.maze):
@@ -140,6 +142,10 @@ def main():
                             to_write += convert_to_hex(neighbors)
                         f.write(to_write)
                         f.write('\n')
+                    f.write('\n')
+                    f.write(f"{mazee.entry[0]},{mazee.entry[1]}\n")
+                    f.write(f"{mazee.exit[0]},{mazee.exit[1]}\n")
+                    f.write(str(path_directions))
 
             elif choice == "2":
                 # Si path_hidden est True, on passe à False (on montre)
